@@ -1,0 +1,36 @@
+/* 
+   NIRD Village - Custom Styles 
+   Most styling is handled by Tailwind CSS in index.html.
+   This file contains specific overrides or complex animations.
+*/
+
+/* Ensure smooth transitions for all interactive elements */
+* {
+    transition-property: color, background-color, border-color, transform, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+/* Active Navigation State Override */
+.nav-item.active {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-primary, #5cb85c);
+    border-color: rgba(92, 184, 92, 0.3);
+}
+
+/* Custom Animation for View Switching */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.view-section.active {
+    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}

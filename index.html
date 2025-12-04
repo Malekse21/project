@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NIRD Village - Tableau de bord de résistance numérique">
+    <title>NIRD Village - Résistance Numérique</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts (Inter) for Premium Feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        deep: '#1a1c20',
+                        panel: '#25282e',
+                        primary: '#5cb85c', /* Forest Green */
+                        secondary: '#f0ad4e', /* Torch Orange */
+                        dark: '#111',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(92, 184, 92, 0.3)',
+                        'glow-alert': '0 0 15px rgba(240, 173, 78, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1c20;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3e4147;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5cb85c;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-deep text-gray-200 font-sans h-screen overflow-hidden flex selection:bg-primary selection:text-white">
+
+    <!-- Sidebar -->
+    <nav class="w-72 bg-panel border-r border-gray-700 flex flex-col p-6 shadow-2xl z-10">
+        <div class="mb-8 pb-4 border-b border-gray-700">
+            <h1 class="text-2xl font-bold text-primary tracking-widest uppercase flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i> NIRD Village
+            </h1>
+            <p class="text-xs text-gray-500 mt-1 uppercase tracking-wider">Résistance Numérique</p>
+        </div>
+
+        <ul class="space-y-2 flex-1">
+            <li>
+                <a href="#"
+                    class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/5 hover:text-primary border border-transparent hover:border-primary/30"
+                    data-view="dashboard">
+                    <i class="fa-solid fa-house w-5 text-center"></i> Quartier Général
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/5 hover:text-primary border border-transparent hover:border-primary/30"
+                    data-view="profile">
+                    <i class="fa-solid fa-user-astronaut w-5 text-center"></i> Profil & Talents
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/5 hover:text-primary border border-transparent hover:border-primary/30"
+                    data-view="map">
+                    <i class="fa-solid fa-map-location-dot w-5 text-center"></i> Carte du Village
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/5 hover:text-primary border border-transparent hover:border-primary/30"
+                    data-view="inventory">
+                    <i class="fa-solid fa-briefcase w-5 text-center"></i> L'Inventaire
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-white/5 hover:text-primary border border-transparent hover:border-primary/30"
+                    data-view="rules">
+                    <i class="fa-solid fa-scroll w-5 text-center"></i> Le Code
+                </a>
+            </li>
+        </ul>
+
+        <div class="mb-6 p-4 bg-black/20 rounded-lg border border-gray-700/50 backdrop-blur-sm">
+            <label for="role-select" class="block text-xs text-gray-500 mb-2 uppercase font-bold">Identité</label>
+            <div class="relative">
+                <select id="role-select"
+                    class="w-full bg-deep text-gray-200 border border-gray-600 rounded px-3 py-2 appearance-none focus:outline-none focus:border-primary transition-colors cursor-pointer">
+                    <option value="student">Le Villageois</option>
+                    <option value="teacher">Le Druide</option>
+                    <option value="admin">Le Chef du Village</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-auto">
+            <div class="bg-black/30 p-4 rounded-lg mb-4 border border-gray-700/50">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-medium text-gray-400">Empreinte CO2</span>
+                    <span class="text-xs font-bold text-secondary co2-value">0.4g</span>
+                </div>
+                <div class="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary w-[12%] shadow-glow-alert meter-fill"></div>
+                </div>
+            </div>
+            <button
+                class="w-full py-3 px-4 border border-secondary text-secondary rounded-lg font-bold hover:bg-secondary hover:text-deep transition-all duration-300 flex items-center justify-center gap-2 group">
+                <i class="fa-solid fa-door-open group-hover:-translate-x-1 transition-transform"></i> Quitter
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto relative">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 pointer-events-none">
+        </div>
+
+        <!-- Header -->
+        <header class="flex justify-between items-end mb-10 pb-6 border-b border-gray-800">
+            <div>
+                <h2 id="greeting" class="text-4xl font-bold text-white mb-2 tracking-tight">Bonjour, Résistant</h2>
+                <span id="rank"
+                    class="inline-block bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/30">
+                    Rang: Novice
+                </span>
+            </div>
+            <div class="w-1/3">
+                <div class="flex justify-between mb-2">
+                    <label class="text-sm font-medium text-primary">Indépendance Numérique</label>
+                    <span class="text-sm font-bold text-white">35%</span>
+                </div>
+                <div class="h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
+                    <div id="independence-progress-bar"
+                        class="h-full bg-gradient-to-r from-primary to-emerald-400 w-[35%] shadow-glow transition-all duration-1000 ease-out">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- View: Dashboard -->
+        <section id="dashboard-view" class="view-section active space-y-8">
+            <!-- Stats Row -->
+            <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Dynamic Stats -->
+            </div>
+
+            <!-- Quests -->
+            <div class="bg-panel border border-gray-700 rounded-xl p-6 shadow-xl">
+                <h3
+                    class="text-xl font-bold text-secondary mb-6 flex items-center gap-2 border-b border-gray-700 pb-2 inline-block">
+                    <i class="fa-solid fa-scroll"></i> Quêtes de la Résistance
+                </h3>
+                <ul id="quest-list" class="space-y-4">
+                    <!-- Dynamic Quests -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- View: Profile -->
+        <section id="profile-view" class="view-section hidden">
+            <div class="mb-8 border-l-4 border-secondary pl-4">
+                <h3 class="text-2xl font-bold text-secondary mb-1">Arbre de Talents</h3>
+                <p class="text-gray-400">Vos compétences dans la lutte contre l'Empire Numérique.</p>
+            </div>
+            <div id="talents-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic Talents -->
+            </div>
+        </section>
+
+        <!-- View: Map -->
+        <section id="map-view" class="view-section hidden">
+            <div class="mb-8 border-l-4 border-primary pl-4">
+                <h3 class="text-2xl font-bold text-primary mb-1">Carte du Village</h3>
+                <p class="text-gray-400">Explorez les zones libérées et les territoires occupés.</p>
+            </div>
+            <div
+                class="grid grid-cols-3 grid-rows-2 gap-4 h-[500px] bg-dark p-4 rounded-xl border-2 border-gray-700 relative overflow-hidden">
+                <!-- Map Zones -->
+                <div
+                    class="col-start-1 row-start-1 border-2 border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-white/5 hover:border-gray-400 hover:text-white hover:scale-[1.02] transition-all cursor-pointer group">
+                    <i class="fa-solid fa-book-open text-3xl mb-2 group-hover:text-primary transition-colors"></i>
+                    <span class="font-bold">Bibliothèque</span>
+                </div>
+
+                <div
+                    class="col-start-2 row-start-1 border-2 border-primary bg-primary/10 rounded-lg flex flex-col items-center justify-center text-primary hover:bg-primary/20 hover:scale-[1.02] transition-all cursor-pointer shadow-glow z-10">
+                    <i class="fa-solid fa-house-flag text-4xl mb-2"></i>
+                    <span class="font-bold text-lg">QG</span>
+                </div>
+
+                <div
+                    class="col-start-3 row-start-1 row-span-2 border-2 border-red-500/50 bg-red-900/10 rounded-lg flex flex-col items-center justify-center text-red-400 hover:bg-red-900/20 hover:border-red-500 hover:scale-[1.02] transition-all cursor-pointer">
+                    <i class="fa-solid fa-tower-broadcast text-5xl mb-4 animate-pulse"></i>
+                    <span class="font-bold text-xl">Tour GAFAM</span>
+                    <span class="text-xs uppercase mt-1 tracking-widest text-red-500/70">Territoire Ennemi</span>
+                </div>
+
+                <div
+                    class="col-start-1 row-start-2 border-2 border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-white/5 hover:border-gray-400 hover:text-white hover:scale-[1.02] transition-all cursor-pointer group">
+                    <i
+                        class="fa-solid fa-basket-shopping text-3xl mb-2 group-hover:text-secondary transition-colors"></i>
+                    <span class="font-bold">Marché</span>
+                </div>
+
+                <div
+                    class="col-start-2 row-start-2 border-2 border-dashed border-emerald-700/50 rounded-lg flex flex-col items-center justify-center text-emerald-500 hover:bg-emerald-900/20 hover:border-emerald-500 hover:scale-[1.02] transition-all cursor-pointer group">
+                    <i class="fa-solid fa-tree text-3xl mb-2 group-hover:text-emerald-400 transition-colors"></i>
+                    <span class="font-bold">Forêt Verte</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Inventory -->
+        <section id="inventory-view" class="view-section hidden">
+            <div class="mb-8 border-l-4 border-amber-500 pl-4">
+                <h3 class="text-2xl font-bold text-amber-500 mb-1">L'Inventaire</h3>
+                <p class="text-gray-400">Vos outils numériques pour résister à l'Empire.</p>
+            </div>
+            <div id="inventory-container" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Dynamic Inventory Items -->
+            </div>
+        </section>
+
+        <!-- View: Rules -->
+        <section id="rules-view" class="view-section hidden">
+            <div class="mb-8 border-l-4 border-blue-500 pl-4">
+                <h3 class="text-2xl font-bold text-blue-500 mb-1">Le Code</h3>
+                <p class="text-gray-400">Les lois ancestrales du Village NIRD.</p>
+            </div>
+            <div
+                class="bg-panel border border-gray-700 rounded-xl p-8 shadow-xl space-y-6 text-gray-300 leading-relaxed">
+                <div class="flex gap-4">
+                    <div class="text-4xl text-primary font-serif">1.</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-2">La Sobriété tu viseras</h4>
+                        <p>Ne consomme que le nécessaire. Chaque octet compte, chaque requête a un coût. Le vrai
+                            résistant est celui qui laisse la plus petite empreinte.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="text-4xl text-primary font-serif">2.</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-2">Tes Données tu protégeras</h4>
+                        <p>L'Empire se nourrit de tes informations. Utilise le chiffrement, bloque les traceurs, et ne
+                            donne jamais ton vrai nom aux machines de Goliath.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="text-4xl text-primary font-serif">3.</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-2">Le Savoir tu partageras</h4>
+                        <p>Le code est libre, comme la parole. Partage tes outils, tes connaissances et tes découvertes
+                            avec le village. L'Open Source est notre arme.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="text-4xl text-primary font-serif">4.</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-2">L'Obsolescence tu combattras</h4>
+                        <p>Répare ton matériel. Fais durer tes appareils. Ne cède pas à la tentation du "toujours plus
+                            neuf" dictée par l'Empire.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
