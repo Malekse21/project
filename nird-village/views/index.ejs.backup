@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Village NIRD - <%= title %>
+    </title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .sidebar-transition {
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+
+        .content-transition {
+            transition: margin-right 0.3s ease;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-black text-green-400 font-sans h-screen flex overflow-hidden">
+
+    <!-- Level Up Modal -->
+    <div id="levelUpModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+        <div
+            class="bg-black border-4 border-green-500 rounded-xl p-8 text-center max-w-md animate-pulse shadow-2xl shadow-green-500/50">
+            <i class="fa-solid fa-trophy text-6xl text-green-500 mb-4"></i>
+            <h2 class="text-4xl font-bold text-green-400 mb-2">NIVEAU SUPÉRIEUR !</h2>
+            <p class="text-2xl text-green-500 mb-4">Le Village NIRD est maintenant</p>
+            <p class="text-5xl font-bold text-green-400 mb-4" id="newLevel">Niveau ?</p>
+            <p class="text-xl text-green-500" id="newRank">Nouveau Rang</p>
+            <button onclick="closeLevelUpModal()"
+                class="mt-6 px-6 py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded text-lg transition-colors">
+                Continuer
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="mainContent" class="flex-1 flex flex-col overflow-hidden relative content-transition"
+        style="margin-right: 280px;">
+        <!-- Top Bar -->
+        <header class="h-16 bg-black border-b border-green-500 flex items-center justify-between px-8">
+            <!-- Logo on Left -->
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-black text-xl shadow-lg shadow-green-500/50">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-green-400 tracking-wide text-lg">NIRD</h1>
+                    <p class="text-xs text-green-500">Village Résistant</p>
+                </div>
+            </div>
+
+            <!-- Page Title -->
+            <h2 class="text-xl font-bold text-green-400 flex items-center gap-2">
+                <% if(tab==='village' ) { %> <i class="fa-solid fa-house"></i> Mon Village <% } %>
+                        <% if(tab==='quests' ) { %> <i class="fa-solid fa-scroll"></i> Journal de Quêtes <% } %>
+                                <% if(tab==='armory' ) { %> <i class="fa-solid fa-toolbox"></i> Outils <% } %>
+                                        <% if(tab==='grimoire' ) { %> <i class="fa-solid fa-book-open"></i> Le Grimoire
+                                            <% } %>
+                                                <% if(tab==='profile' ) {%> <i class="fa-solid fa-user"></i> Profil <% }
+                                                        %>
+            </h2>
+            <div class="w-48"></div> <!-- Spacer for centering -->
+        </header>
+
+        <!-- Dynamic Content Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-8 bg-black">
+
+            <!-- VIEW: VILLAGE (DASHBOARD) -->
+            <% if (tab==='village' ) { %>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Stats Cards -->
+                    <div class="bg-black p-6 rounded-xl border border-green-500 shadow-lg shadow-green-500/20">
+                        <div class="text-green-400 text-sm mb-1 opacity-70">Score Souveraineté</div>
+                        <div class="text-3xl font-bold text-green-400">
+                            <%= data.stats.sovereigntyScore %>%
+                        </div>
+                        <div class="w-full bg-green-900/20 rounded-full h-2 mt-3 border border-green-500/30">
+                            <div class="bg-green-500 h-2 rounded-full"
+                                style="width: <%= data.stats.sovereigntyScore %>%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-black p-6 rounded-xl border border-green-500 shadow-lg shadow-green-500/20">
+                        <div class="text-green-400 text-sm mb-1 opacity-70">Rang Actuel</div>
+                        <div class="text-3xl font-bold text-green-400">
+                            <%= data.stats.level %>
+                        </div>
+                        <div class="text-green-400 text-sm">
+                            <%= data.stats.rank %>
+                        </div>
+                    </div>
+                    <div class="bg-black p-6 rounded-xl border border-green-500 shadow-lg shadow-green-500/20">
+                        <div class="text-green-400 text-sm mb-1 opacity-70">CO2 Économisé</div>
+                        <div class="text-3xl font-bold text-green-400">
+                            <%= data.stats.co2Saved %>
+                        </div>
+                        <div class="text-xs text-green-400 opacity-60 mt-1">Grâce au matériel durable</div>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-green-400 mb-4"><i class="fa-solid fa-bell mr-2"></i> Alertes du
+                    Village</h3>
+                <div class="space-y-3">
+                    <% data.alerts.forEach(alert=> { %>
+                        <div
+                            class="p-4 rounded-lg border-l-4 <%= alert.type === 'warning' ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-green-900/10 border-green-500/50 text-green-400' %>">
+                            <%= alert.msg %>
+                        </div>
+                        <% }) %>
+                </div>
+                <% } %>
+
+                    <!-- VIEW: QUESTS -->
+                    <% if (tab==='quests' ) { %>
+                        <!-- Village Progress Bar -->
+                        <div class="bg-black p-6 rounded-xl border border-green-500 shadow-lg shadow-green-500/20 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-green-400">Village NIRD - Niveau <%=
+                                            data.stats.level %>
+                                    </h3>
+                                    <p class="text-green-500 text-sm">
+                                        <%= data.stats.rank %>
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-green-400 text-sm opacity-70">Progression du Village</div>
+                                    <div class="text-xl font-bold text-green-400">
+                                        <%= data.stats.currentXP %> / <%= data.stats.nextLevelXP %> XP
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-full bg-green-900/20 rounded-full h-3 border border-green-500/30">
+                                <div class="bg-green-500 h-3 rounded-full transition-all duration-500"
+                                    style="width: <%= (data.stats.currentXP / data.stats.nextLevelXP * 100) %>%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Quests List -->
+                        <h3 class="text-lg font-bold text-green-400 mb-4"><i class="fa-solid fa-star mr-2"></i> Quêtes
+                            Disponibles</h3>
+                        <div class="space-y-4">
+                            <% quests.forEach(quest=> { %>
+                                <div
+                                    class="bg-black p-5 rounded-xl border border-green-500 flex items-center justify-between hover:shadow-lg hover:shadow-green-500/30 transition-all group">
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-green-900/30 border border-green-500 flex items-center justify-center text-green-500 text-xl group-hover:bg-green-500 group-hover:text-black transition-colors">
+                                            <i class="fa-solid fa-scroll"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-green-400 text-lg">
+                                                <%= quest.title%>
+                                            </h4>
+                                            <p class="text-green-400 opacity-70 text-sm">
+                                                <%= quest.desc %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="block text-green-400 font-bold mb-1">+<%= quest.xp %> XP</span>
+                                        <a href="/complete-quest/<%= quest.id %>"
+                                            class="bg-green-900/30 hover:bg-green-500 hover:text-black text-green-400 px-4 py-1 border border-green-500 rounded text-sm transition-colors">
+                                            Accepter
+                                        </a>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                        <% } %>
+
+                            <!-- VIEW: ARMORY (Role-Based) -->
+                            <%if (tab==='armory' ) { %>
+
+                                <!-- Loop through each Role Category -->
+                                <% const roles=[ { key: 'student' , label: 'Pour les Villageois (Élèves)' ,
+                                    color: 'text-green-400' , icon: 'fa-user-graduate' }, { key: 'teacher' ,
+                                    label: 'Pour les Druides (Profs)' , color: 'text-yellow-400' ,
+                                    icon: 'fa-chalkboard-teacher' }, { key: 'admin' ,
+                                    label: 'Pour les Chefs (Direction)' , color: 'text-purple-400' , icon: 'fa-user-tie'
+                                    }, { key: 'parent' , label: 'Pour les Familles (Parents)' , color: 'text-blue-400' ,
+                                    icon: 'fa-people-roof' } ]; %>
+
+                                    <% roles.forEach(role=> { %>
+
+                                        <!-- Section Header -->
+                                        <div
+                                            class="mb-6 mt-2 border-b border-green-500/30 pb-3 flex items-center gap-3">
+                                            <i class="fa-solid <%= role.icon %> <%= role.color %> text-xl"></i>
+                                            <h3 class="text-xl font-bold text-green-400">
+                                                <%= role.label %>
+                                            </h3>
+                                        </div>
+
+                                        <!-- Grid for this Role -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                                            <% armoryData[role.key].forEach(tool=> { %>
+                                                <div
+                                                    class="bg-black rounded-xl overflow-hidden border border-green-500 hover:shadow-lg hover:shadow-green-500/30 transition-all group relative">
+
+                                                    <!-- "Replaces Goliath" Badge -->
+                                                    <div
+                                                        class="absolute top-2 right-2 bg-black/90 text-xs text-green-400 px-2 py-1 rounded border border-green-500/50 backdrop-blur-sm z-10">
+                                                        Remplace <span class="text-red-400 line-through">
+                                                            <%= tool.replaces %>
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Icon Area -->
+                                                    <div
+                                                        class="h-24 bg-green-900/20 flex items-center justify-center border-b border-green-500 group-hover:bg-green-900/30 transition-all">
+                                                        <i class="<%= tool.icon %> text-4xl <%= role.color %>"></i>
+                                                    </div>
+
+                                                    <!-- Content -->
+                                                    <div class="p-5">
+                                                        <h4 class="font-bold text-green-400 text-lg mb-1">
+                                                            <%= tool.name %>
+                                                        </h4>
+                                                        <p class="text-sm text-green-400 opacity-70 mb-4 h-10">
+                                                            <%= tool.desc %>
+                                                        </p>
+
+                                                        <a href="<%= tool.link %>" target="_blank"
+                                                            class="w-full py-2 bg-green-900/30 hover:bg-green-500 hover:text-black text-green-400 rounded font-semibold transition-colors flex items-center justify-center gap-2 border border-green-500">
+                                                            <i class="fa-solid fa-download text-sm"></i>
+                                                            <span>Équiper</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <% }) %>
+                                        </div>
+
+                                        <% }) %>
+
+                                            <% } %>
+
+                                                <!-- VIEW: GRIMOIRE -->
+                                                <% if (tab==='grimoire' ) { %>
+                                                    <div class="relative mb-6">
+                                                        <input type="text" placeholder="Rechercher une connaissance..."
+                                                            class="w-full bg-black border border-green-500 rounded-lg py-3 px-4 text-green-400 placeholder-green-400/50 focus:outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-500/30">
+                                                        <i
+                                                            class="fa-solid fa-search absolute right-4 top-4 text-green-500"></i>
+                                                    </div>
+                                                    <div class="space-y-2">
+                                                        <% articles.forEach(art=> { %>
+                                                            <div
+                                                                class="flex items-center p-4 bg-black rounded-lg border border-green-500 hover:shadow-lg hover:shadow-green-500/30 cursor-pointer transition-all">
+                                                                <i class="fa-solid fa-book text-green-500 mr-4"></i>
+                                                                <div class="flex-1">
+                                                                    <h4 class="text-green-400 font-medium">
+                                                                        <%= art.title %>
+                                                                    </h4>
+                                                                    <p class="text-xs text-green-400 opacity-60">
+                                                                        Catégorie : <%= art.category %>
+                                                                    </p>
+                                                                </div>
+                                                                <i class="fa-solid fa-chevron-right text-green-500"></i>
+                                                            </div>
+                                                            <% }) %>
+                                                    </div>
+                                                    <% } %>
+
+                                                        <!-- VIEW: PROFILE -->
+                                                        <% if (tab==='profile' ) { %>
+                                                            <div class="max-w-2xl mx-auto">
+                                                                <div
+                                                                    class="bg-black p-8 rounded-xl border border-green-500 shadow-lg shadow-green-500/20">
+                                                                    <div class="flex items-center gap-6 mb-8">
+                                                                        <div
+                                                                            class="w-24 h-24 rounded-full border-4 border-green-500 overflow-hidden shadow-lg shadow-green-500/30">
+                                                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Druid"
+                                                                                alt="Avatar">
+                                                                        </div>
+                                                                        <div>
+                                                                            <h2
+                                                                                class="text-2xl font-bold text-green-400">
+                                                                                <%= data.stats.rank %>
+                                                                            </h2>
+                                                                            <p class="text-green-500 mt-1">Niveau <%=
+                                                                                    data.stats.level %> -
+                                                                                    <%= data.stats.rank %>
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="space-y-4">
+                                                                        <div>
+                                                                            <label
+                                                                                class="text-green-400 text-sm block mb-2">Email</label>
+                                                                            <input type="email" value="gardien@nird.fr"
+                                                                                class="w-full bg-green-900/20 border border-green-500 rounded-lg py-2 px-4 text-green-400 focus:outline-none focus:border-green-400">
+                                                                        </div>
+                                                                        <div>
+                                                                            <label
+                                                                                class="text-green-400 text-sm block mb-2">Mode</label>
+                                                                            <div
+                                                                                class="flex items-center gap-2 bg-green-900/20 border border-green-500 rounded-lg py-2 px-4">
+                                                                                <i
+                                                                                    class="fa-solid fa-leaf text-green-500"></i>
+                                                                                <span class="text-green-400">Eco-Mode
+                                                                                    Activé</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label
+                                                                                class="text-green-400 text-sm block mb-2">Statistiques</label>
+                                                                            <div class="grid grid-cols-3 gap-4">
+                                                                                <div
+                                                                                    class="bg-green-900/20 border border-green-500 rounded-lg p-3 text-center">
+                                                                                    <div
+                                                                                        class="text-2xl font-bold text-green-400">
+                                                                                        <%= data.stats.sovereigntyScore
+                                                                                            %>%
+                                                                                    </div>
+                                                                                    <div
+                                                                                        class="text-xs text-green-500 mt-1">
+                                                                                        Souveraineté</div>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="bg-green-900/20 border border-green-500 rounded-lg p-3 text-center">
+                                                                                    <div
+                                                                                        class="text-2xl font-bold text-green-400">
+                                                                                        <%= data.stats.level %>
+                                                                                    </div>
+                                                                                    <div
+                                                                                        class="text-xs text-green-500 mt-1">
+                                                                                        Niveau</div>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="bg-green-900/20 border border-green-500 rounded-lg p-3 text-center">
+                                                                                    <div
+                                                                                        class="text-2xl font-bold text-green-400">
+                                                                                        <%= data.stats.co2Saved %>
+                                                                                    </div>
+                                                                                    <div
+                                                                                        class="text-xs text-green-500 mt-1">
+                                                                                        CO2 Économisé</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label
+                                                                                class="text-green-400 text-sm block mb-2">Actions</label>
+                                                                            <a href="/reset"
+                                                                                class="w-full text-center py-2 bg-red-900/30 hover:bg-red-500 hover:text-black text-red-400 rounded font-semibold transition-colors flex items-center justify-center gap-2 border border-red-500">
+                                                                                <i
+                                                                                    class="fa-solid fa-trash text-sm"></i>
+                                                                                <span>Réinitialiser</span>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% } %>
+
+        </div>
+    </main>
+
+    <!-- SIDEBAR (Right side) -->
+    <aside id="sidebar"
+        class="w-64 bg-black border-l border-green-500 flex flex-col shadow-2xl z-10 fixed right-0 h-screen sidebar-transition">
+        <!-- Collapse Button -->
+        <button id="toggleSidebar"
+            class="absolute -left-10 top-1/2 transform -translate-y-1/2 bg-green-500 text-black w-8 h-16 rounded-l-lg hover:bg-green-400 transition-colors flex items-center justify-center shadow-lg">
+            <i id="toggleIcon" class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="flex-1 overflow-hidden flex flex-col">
+            <!-- Navigation Links -->
+            <nav class="mt-6 px-4 space-y-2 flex-1" id="navLinks">
+                <% const
+                    navClass="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-left transition-all duration-200"
+                    ; %>
+                    <% const activeClass="bg-green-500 text-black shadow-md shadow-green-500/50" ; %>
+                        <% const
+                            inactiveClass="text-green-400 border border-green-500/30 hover:bg-green-500 hover:text-black"
+                            ; %>
+
+                            <a href="/quests"
+                                class="<%= navClass %> <%= tab === 'quests' ? activeClass : inactiveClass %>">
+                                <div class="relative">
+                                    <i class="fa-solid fa-scroll w-6 text-center"></i>
+                                    <% if(tab !=='quests' ) { %>
+                                        <span
+                                            class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black"></span>
+                                        <% } %>
+                                </div>
+                                <span class="nav-text">Quêtes</span>
+                            </a>
+
+                            <a href="/armory"
+                                class="<%= navClass %> <%= tab === 'armory' ? activeClass : inactiveClass %>">
+                                <i class="fa-solid fa-toolbox w-6 text-center"></i>
+                                <span class="nav-text">Outils</span>
+                            </a>
+
+                            <a href="/grimoire"
+                                class="<%= navClass %> <%= tab === 'grimoire' ? activeClass : inactiveClass %>">
+                                <i class="fa-solid fa-book-open w-6 text-center"></i>
+                                <span class="nav-text">Le Grimoire</span>
+                            </a>
+
+                            <a href="/profile"
+                                class="<%= navClass %> <%= tab === 'profile' ? activeClass : inactiveClass %>">
+                                <i class="fa-solid fa-user w-6 text-center"></i>
+                                <span class="nav-text">Profil</span>
+                            </a>
+            </nav>
+
+            <!-- Footer Stats -->
+            <div class="p-4 border-t border-green-500" id="footerStats">
+                <div class="flex items-center justify-between text-xs text-green-400 mb-2 opacity-70">
+                    <span>Serveur Eco</span>
+                    <span class="text-green-400">En ligne <span class="text-green-500">●</span></span>
+                </div>
+                <div class="w-full bg-green-900/20 rounded-full h-1.5 border border-green-500/30">
+                    <div class="bg-green-500 h-1.5 rounded-full" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        let isCollapsed = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isCollapsed = !isCollapsed;
+
+            if (isCollapsed) {
+                sidebar.style.width = '70px';
+                mainContent.style.marginRight = '70px';
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
+
+                // Hide text elements
+                document.querySelectorAll('.nav-text').forEach(el => el.style.display = 'none');
+                document.getElementById('footerStats').style.opacity = '0';
+            } else {
+                sidebar.style.width = '256px';
+                mainContent.style.marginRight = '280px';
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+
+                // Show text elements
+                document.querySelectorAll('.nav-text').forEach(el => el.style.display = 'inline');
+                document.getElementById('footerStats').style.opacity = '1';
+            }
+        });
+
+        // Level up functionality
+        const ranks = <%= typeof data !== 'undefined' ? JSON.stringify(data.levelRanks || {}) : '{}' %>;
+
+        function showLevelUpModal(level, rank) {
+            // Play celebratory sound
+            playLevelUpSound();
+
+            // Create confetti
+            createConfetti();
+
+            // Show modal
+            // Create oscillator for a triumphant sound
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // Frequency sweep from 400Hz to 800Hz (triumphant rise)
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + duration * 0.5);
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + duration);
+
+            // Volume envelope
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.type = 'sine';
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function createConfetti() {
+            const colors = ['#22c55e', '#10b981', '#84cc16', '#fbbf24'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+    </script>
+</body>
+
+</html>
